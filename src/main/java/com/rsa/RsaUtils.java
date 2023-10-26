@@ -9,6 +9,9 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class RsaUtils {
@@ -61,14 +64,22 @@ public class RsaUtils {
     }
 
     public String generateDataString(Map<String, String> data) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : data.entrySet()) {
-            if (!entry.getKey().equals("sign")) { // 排除掉sign字段
-                sb.append(entry.getKey()).append("=").append(String.valueOf(entry.getValue())).append("&");
-            }
+        // 移除 sign 字段
+        data.remove("sign");
+        // 获取所有键名并存储在列表中
+        List<String> keys = new ArrayList<>(data.keySet());
+        // 对键名进行升序排序
+        Collections.sort(keys);
+        // 拼接键名和对应的值
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String key : keys) {
+            Object value = data.get(key);
+            stringBuilder.append(key).append("=").append(value).append("&");
         }
-        sb.deleteCharAt(sb.length() - 1); // 删除最后一个多余的"&"
-        return sb.toString();
+        // 移除最后一个多余的 "&" 符号
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        // 待签字符串
+        return stringBuilder.toString();
     }
 
     private PublicKey getPublicKeyFromString(String rsaPublicKey) throws Exception {
@@ -115,9 +126,9 @@ public class RsaUtils {
     public String signStr(String data) throws Exception {
         // 要签名的数据
         String dataStr = this.generateDataString(JSONUtil.parseObj(data).toBean(Map.class));
-        String dataStrBase64 = Base64.encode(dataStr.getBytes("UTF-8"));
+//        String dataStrBase64 = Base64.encode(.getBytes("UTF-8"));
         // 使用私钥进行签名
-        byte[] signature = this.sign(dataStrBase64);
+        byte[] signature = this.sign(dataStr);
         return Base64.encode(signature);
     }
 
