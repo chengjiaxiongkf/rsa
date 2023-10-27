@@ -63,23 +63,8 @@ public class RsaUtils {
                 "-----END PRIVATE KEY-----\n";
     }
 
-    public String generateDataString(Map<String, String> data) {
-        // 移除 sign 字段
-        data.remove("sign");
-        // 获取所有键名并存储在列表中
-        List<String> keys = new ArrayList<>(data.keySet());
-        // 对键名进行升序排序
-        Collections.sort(keys);
-        // 拼接键名和对应的值
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String key : keys) {
-            Object value = data.get(key);
-            stringBuilder.append(key).append("=").append(value).append("&");
-        }
-        // 移除最后一个多余的 "&" 符号
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        // 待签字符串
-        return stringBuilder.toString();
+    public String generateDataString(Map<String, Object> data) {
+        return SortUtils.parseParam(data);
     }
 
     private PublicKey getPublicKeyFromString(String rsaPublicKey) throws Exception {
