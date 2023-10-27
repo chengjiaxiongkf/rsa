@@ -1,5 +1,6 @@
 package com.rsa;
 
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
@@ -18,7 +19,7 @@ public class RsaUtils {
     private String rsaPrivateKey;
     private String rsaPublicKey;
 
-    public RsaUtils(String rsaPrivateKey,String rsaPublicKey) {
+    public RsaUtils(String rsaPrivateKey, String rsaPublicKey) {
         this.rsaPublicKey = rsaPublicKey;
         this.rsaPrivateKey = rsaPrivateKey;
     }
@@ -104,14 +105,15 @@ public class RsaUtils {
 
     /**
      * 加签
+     *
      * @param data
      * @return
      * @throws Exception
      */
     public String signStr(String data) throws Exception {
         // 要签名的数据
-        String dataStr = this.generateDataString(JSONUtil.parseObj(data).toBean(Map.class));
-//        String dataStrBase64 = Base64.encode(.getBytes("UTF-8"));
+        String dataStr = SortUtils.parseParam(SortUtils.jsonSort(new JSONObject(data).toBean(Map.class)));
+        System.out.println("排序后参数:" + dataStr);
         // 使用私钥进行签名
         byte[] signature = this.sign(dataStr);
         return Base64.encode(signature);
@@ -128,6 +130,6 @@ public class RsaUtils {
     public boolean verifyStr(String data, String sign) throws Exception {
         String dataStr = this.generateDataString(JSONUtil.parseObj(data).toBean(Map.class));
         String dataStrBase64 = Base64.encode(dataStr.getBytes("UTF-8"));
-        return this.verify(dataStrBase64,Base64.decode(sign));
+        return this.verify(dataStrBase64, Base64.decode(sign));
     }
 }
